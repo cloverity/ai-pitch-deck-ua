@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloverity — AI Pitch Deck (UA)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue:#1983f8; --lime:#83f819;
+    --ink:#0B1220; --graphite:#3A4252; --muted:#6B7280;
+    --line:#E5E8EF; --div:#C6CDD9; --surface:#F7F9FC; --white:#FFFFFF;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:#0d0f14;font-family:'Manrope',sans-serif;-webkit-font-smoothing:antialiased;display:flex;align-items:center;justify-content:center;min-height:100vh;overflow:hidden;padding-bottom:46px}
+  .stage{display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+
+  .slide{display:none;width:min(95vw,156vh);aspect-ratio:16/9;container-type:size;position:relative;overflow:hidden;border-radius:6px;box-shadow:0 24px 70px rgba(0,0,0,.55);background:var(--surface)}
+  .slide.active{display:flex}
+
+  /* entrance motion — staggered rise on slide activation */
+  @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  .content.active .pad>*{animation:rise .5s cubic-bezier(.2,.7,.2,1) both}
+  .content.active .pad>*:nth-child(1){animation-delay:.02s}
+  .content.active .pad>*:nth-child(2){animation-delay:.10s}
+  .content.active .pad>*:nth-child(3){animation-delay:.18s}
+  .content.active .pad>*:nth-child(4){animation-delay:.26s}
+  .split.active .left{animation:rise .55s cubic-bezier(.2,.7,.2,1) both}
+  .split.active .right{animation:rise .55s cubic-bezier(.2,.7,.2,1) .12s both}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+
+  /* ---------- content slide skeleton ---------- */
+  .content{background:var(--surface);color:var(--ink)}
+  .content .pad{position:absolute;inset:0;padding:5cqw 7cqw;display:flex;flex-direction:column}
+  .kicker{display:flex;flex-direction:column;gap:1.6cqw;font-family:'Space Mono',monospace;font-size:1.6cqw;letter-spacing:.12em;color:var(--graphite)}
+  .kicker .trule{display:flex;align-items:center;gap:1.6cqw}
+  .kicker .trule .line{flex:1;height:2px;background:var(--blue)}
+  .kicker .sq{width:1.6cqw;height:1.6cqw;background:var(--lime);flex:none}
+  .h2{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;color:var(--ink);font-size:5cqw;line-height:1.03;letter-spacing:-.02em;margin:2cqw 0 0;max-width:24ch}
+  .h2.sm{font-size:4cqw}
+  .h2 .blue{color:var(--blue)}
+  .h2 mark{background:var(--lime);color:var(--ink);padding:0 .6cqw}
+  .punch{margin:auto 0 0;text-align:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:3cqw;color:var(--ink);letter-spacing:-.01em}
+  .punch mark{background:var(--lime);color:var(--ink);padding:0 .5cqw}
+  .punch .blue{color:var(--blue)}
+  .mid{margin:auto 0}
+  .fill{margin:4cqw 0 auto}
+
+  /* two-path / two-col compare */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;margin:auto 0 0;align-self:stretch}
+  .grid2 .cell{padding:0 3cqw}
+  .grid2 .cell:first-child{padding-left:0;border-right:1px solid var(--div)}
+  .grid2 .cell:last-child{padding-right:0}
+  .lbl{font-family:'Space Mono',monospace;font-size:1.5cqw;letter-spacing:.12em;color:var(--graphite);text-transform:uppercase}
+  .lbl em{color:var(--ink);font-style:normal;background:var(--lime);padding:0 .5cqw;border-radius:2px}
+  .lbl .tag{color:#fff;background:var(--blue);padding:0 .9cqw;border-radius:2px;margin-left:.5cqw}
+  .cell .ct{font-family:'Manrope',sans-serif;font-weight:700;font-size:2.3cqw;margin-top:1.4cqw;line-height:1.26;color:var(--ink)}
+
+  /* cards grid (pillars / services) */
+  .cards{display:grid;gap:2cqw}
+  .cards.c4{grid-template-columns:repeat(4,1fr)}
+  .cards.c3{grid-template-columns:repeat(3,1fr)}
+  .cards.c2{grid-template-columns:repeat(2,1fr)}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:2.8cqw 2.4cqw;display:flex;flex-direction:column;gap:1.3cqw}
+  .card .ic{font-size:3.2cqw;line-height:1}
+  .card .ct-t{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:2.2cqw;color:var(--ink);letter-spacing:-.01em}
+  .card .ct-d{font-family:'Manrope',sans-serif;font-weight:500;font-size:1.6cqw;color:var(--graphite);line-height:1.32}
+  .card .num{font-family:'Space Mono',monospace;font-size:1.5cqw;color:var(--blue);letter-spacing:.1em}
+  /* slide 7: 2×2 grid is dense — compact the cards so nothing clips */
+  .cards.c2.mid{gap:1.5cqw}
+  .cards.c2.mid .card{padding:2.1cqw 2.2cqw;gap:.85cqw}
+  .cards.c2.mid .card .ic{font-size:2.7cqw}
+
+  /* comparison table (slide 3) */
+  .cmp{margin:auto 0;display:flex;flex-direction:column}
+  .cmp-row{display:grid;grid-template-columns:1.05fr 1.45fr 1.45fr;align-items:center;border-top:1px solid var(--div)}
+  .cmp-row.head{border-top:none}
+  .cmp-row>div{padding:1.05cqw 1.6cqw}
+  .cmp .dim{font-family:'Space Mono',monospace;font-size:1.45cqw;letter-spacing:.06em;color:var(--graphite);text-transform:uppercase}
+  .cmp .c{font-family:'Manrope',sans-serif;font-weight:600;font-size:1.62cqw;line-height:1.22;color:var(--ink)}
+  .cmp .bad{color:var(--graphite)}
+  .cmp .ours{background:rgba(25,131,248,.06)}
+  .cmp-row.head .ch{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:2cqw;letter-spacing:-.01em}
+  .cmp-row.head .chatgpt{color:var(--graphite)}
+  .cmp-row.head .ours{color:var(--blue);border-top:3px solid var(--lime)}
+
+  /* steps (slide 9) */
+  .steps{display:flex;align-items:stretch;gap:1.4cqw;margin:auto 0 0}
+  .steps .st{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:2.6cqw 2.2cqw;display:flex;flex-direction:column;gap:1cqw}
+  .steps .st .n{font-family:'Space Mono',monospace;font-size:1.5cqw;color:var(--blue);letter-spacing:.1em}
+  .steps .st .t{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:2.5cqw;color:var(--ink)}
+  .steps .st .d{font-family:'Manrope',sans-serif;font-weight:500;font-size:1.55cqw;color:var(--graphite);line-height:1.3}
+  .steps .arrow{display:flex;align-items:center;color:var(--lime);font-size:3cqw;font-weight:800}
+
+  /* checks (slide 11) */
+  .checks{display:flex;flex-direction:column;gap:0;margin:auto 0;border-top:1px solid var(--div)}
+  .checks .ck{display:flex;align-items:center;gap:2.4cqw;padding:1.45cqw 0;border-bottom:1px solid var(--div)}
+  .checks .ck .mk{width:3.1cqw;height:3.1cqw;flex:none;border-radius:50%;background:var(--lime);display:flex;align-items:center;justify-content:center;color:var(--ink);font-weight:800;font-size:1.75cqw}
+  .checks .ck .tx{font-family:'Manrope',sans-serif;font-weight:700;font-size:2.3cqw;color:var(--ink)}
+  .checks .ck .tx small{display:block;font-weight:500;font-size:1.6cqw;color:var(--graphite);margin-top:.4cqw}
+
+  /* tag chips (slide 5) */
+  .chips{display:flex;flex-wrap:wrap;gap:1.4cqw;margin:3cqw 0 0}
+  .chips span{font-family:'Space Mono',monospace;font-size:1.7cqw;color:var(--ink);background:#fff;border:1px solid var(--div);border-radius:100px;padding:1.1cqw 2cqw}
+  .lead{font-family:'Manrope',sans-serif;font-weight:600;font-size:2.4cqw;color:var(--graphite);line-height:1.35;margin-top:auto;max-width:34ch}
+  .lead b{color:var(--ink)}
+
+  /* stack strip (slide 6) */
+  .strip{margin-top:3cqw;display:flex;flex-wrap:wrap;gap:1.2cqw;align-items:center}
+  .strip .pill{font-family:'Space Mono',monospace;font-size:1.55cqw;color:var(--blue);background:rgba(25,131,248,.08);border-radius:6px;padding:.9cqw 1.5cqw}
+  .strip .meta{font-family:'Manrope',sans-serif;font-weight:700;font-size:1.7cqw;color:var(--ink)}
+  .stat{display:flex;gap:2cqw;margin-top:auto}
+  .stat .s{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:2.2cqw}
+  .stat .s b{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:3.4cqw;color:var(--blue);display:block;letter-spacing:-.02em}
+  .stat .s span{font-family:'Manrope',sans-serif;font-weight:600;font-size:1.6cqw;color:var(--graphite)}
+
+  /* before/after (slide 8) */
+  .ba{display:grid;grid-template-columns:1fr 1.25fr;gap:2cqw;margin:auto 0 0}
+  .ba .b{border-radius:12px;padding:1.8cqw 2.1cqw;display:flex;flex-direction:column;gap:.9cqw}
+  .ba .b.bad{background:#fff;border:1px solid var(--line)}
+  .ba .b.good{background:rgba(25,131,248,.06);border:1px solid rgba(25,131,248,.25)}
+  .ba .tagline{font-family:'Space Mono',monospace;font-size:1.45cqw;letter-spacing:.1em;text-transform:uppercase}
+  .ba .bad .tagline{color:var(--muted)}
+  .ba .good .tagline{color:var(--blue)}
+  .ba .quote{font-family:'Manrope',sans-serif;font-weight:600;font-size:1.95cqw;line-height:1.3;color:var(--ink)}
+  .ba .good .quote b{color:var(--ink)}
+  .ba .rw{font-family:'Manrope',sans-serif;font-weight:500;font-size:1.55cqw;color:var(--graphite);line-height:1.32;border-top:1px dashed var(--div);padding-top:1.4cqw}
+  .ba .rw mark{background:var(--lime);color:var(--ink);padding:0 .4cqw}
+
+  /* ---------- TITLE (slide 1) & CLOSING (slide 12) — split blue ---------- */
+  .split{color:var(--ink);font-family:'Manrope',sans-serif}
+  .split .left{width:40%;background:var(--blue);position:relative;overflow:hidden;padding:6cqw 4.5cqw;display:flex;flex-direction:column;justify-content:space-between}
+  .split .left::after{content:"";position:absolute;width:46cqw;height:46cqw;right:-22cqw;bottom:-26cqw;border-radius:50%;background:rgba(255,255,255,.10)}
+  .split .bd{display:flex;align-items:center;gap:1cqw;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;color:#fff;font-size:2.4cqw;letter-spacing:.02em;z-index:1}
+  .split .bd .dot{width:1.7cqw;height:1.7cqw;background:var(--lime);border-radius:50%;box-shadow:0 0 12px var(--lime);flex:none}
+  .split .big{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;color:#fff;font-size:5.8cqw;line-height:.98;letter-spacing:-.02em;z-index:1;overflow-wrap:break-word}
+  .split .tiny{font-size:1.7cqw;color:rgba(255,255,255,.82);font-weight:500;z-index:1}
+  .split .tiny a{color:#fff;text-decoration:underline;text-underline-offset:.3cqw;text-decoration-thickness:.12cqw;text-decoration-color:rgba(255,255,255,.55)}
+  .split .right{width:60%;padding:6cqw 5cqw;display:flex;flex-direction:column;justify-content:center;gap:3cqw}
+  .split .quote{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:3.5cqw;line-height:1.1;letter-spacing:-.015em;color:var(--ink)}
+  .split .quote .hl{position:relative;white-space:nowrap}
+  .split .quote .hl::after{content:"";position:absolute;left:-.2cqw;right:-.2cqw;bottom:.3cqw;height:1.1cqw;background:var(--lime);z-index:-1}
+  .split .quote .hl span{position:relative;z-index:1}
+  .split .sub{font-size:2.05cqw;color:var(--graphite);font-weight:500;line-height:1.4}
+  .split .cta{display:inline-flex;align-items:center;gap:1cqw;align-self:flex-start;background:var(--ink);color:#fff;font-weight:700;font-size:2cqw;padding:1.6cqw 2.4cqw;border-radius:100px}
+  .split .cta .arr{color:var(--lime)}
+
+  /* ---------- Q&A (slide 13) — blue full-bleed ---------- */
+  .qa{background:var(--blue);color:#fff;align-items:center;justify-content:center;position:relative;overflow:hidden}
+  .qa::after{content:"";position:absolute;width:60cqw;height:60cqw;right:-26cqw;top:-30cqw;border-radius:50%;background:rgba(255,255,255,.08)}
+  .qa .qa-in{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:2.4cqw;text-align:center;padding:0 8cqw}
+  .qa .bd{display:flex;align-items:center;gap:1cqw;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:2.2cqw}
+  .qa .bd .dot{width:1.6cqw;height:1.6cqw;background:var(--lime);border-radius:50%;box-shadow:0 0 12px var(--lime)}
+  .qa .qa-big{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:9cqw;line-height:1;letter-spacing:-.02em}
+  .qa .qa-sub{font-family:'Manrope',sans-serif;font-weight:500;font-size:2.3cqw;color:rgba(255,255,255,.9);max-width:32ch}
+  .qa.active .qa-in>*{animation:rise .55s cubic-bezier(.2,.7,.2,1) both}
+  .qa.active .qa-in>*:nth-child(2){animation-delay:.1s}
+  .qa.active .qa-in>*:nth-child(3){animation-delay:.2s}
+
+  /* ---------- Appendix (slide 14) — 21 criteria, dense ---------- */
+  .cap-note{font-family:'Space Mono',monospace;font-size:1.3cqw;color:var(--muted);letter-spacing:.04em;margin-top:1.4cqw}
+  .appx{display:grid;grid-template-columns:repeat(3,1fr);gap:2cqw 2.4cqw;margin:3cqw 0 0}
+  .gb{display:flex;flex-direction:column;gap:1cqw}
+  .gb .gh{display:flex;align-items:baseline;gap:1cqw}
+  .gb .gt{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:1.85cqw;color:var(--ink);letter-spacing:-.01em}
+  .gb .lvl{font-family:'Space Mono',monospace;font-size:1.15cqw;letter-spacing:.06em;color:var(--blue)}
+  .gb ul{list-style:none;display:flex;flex-direction:column;gap:.6cqw}
+  .gb li{font-family:'Manrope',sans-serif;font-weight:500;font-size:1.3cqw;color:var(--graphite);line-height:1.25;padding-left:1.7cqw;position:relative}
+  .gb li::before{content:"";position:absolute;left:0;top:.52cqw;width:.55cqw;height:.55cqw;background:var(--lime);border-radius:50%}
+
+  /* ---------- report artifact (BidReview example) ---------- */
+  .report .pad{padding:2.2cqw 3.6cqw}
+  .rep-doc{flex:1;margin-top:1.1cqw;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 34px rgba(11,18,32,.10);display:flex;flex-direction:column;overflow:hidden}
+  .rep-top{display:flex;align-items:flex-start;gap:2.6cqw;padding:1.4cqw 2.4cqw 1.1cqw;background:#EAF2F6}
+  .rep-logo{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:2.3cqw;letter-spacing:-.03em;color:var(--ink);flex:none}
+  .rep-logo span{color:var(--blue)}
+  .rep-meta{display:grid;grid-template-columns:auto auto;gap:.02cqw 1.3cqw;align-content:start}
+  .rep-meta dt{font-family:'Manrope',sans-serif;font-size:1.12cqw;color:var(--graphite);font-weight:600}
+  .rep-meta dd{font-family:'Manrope',sans-serif;font-size:1.12cqw;color:var(--ink);font-weight:800}
+  .rep-plan{margin-left:auto;border:1.5px solid var(--ink);border-radius:14px;padding:.6cqw 1cqw;display:flex;flex-direction:column;gap:.5cqw;align-items:center;flex:none}
+  .rep-plan .fl{font-family:'Manrope',sans-serif;font-size:1cqw;color:var(--ink);font-weight:600}
+  .rep-plan .fl b{font-weight:800}
+  .rep-plan .pb{background:var(--ink);color:#fff;font-weight:700;font-size:1.1cqw;border-radius:10px;padding:.5cqw 1.5cqw}
+  .rep-banner{display:flex;align-items:center;justify-content:space-between;margin:1cqw 2.4cqw 0;padding:.5cqw .5cqw .5cqw 1.6cqw;background:#EFC15B;border-radius:8px}
+  .rep-banner .bt{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:1.6cqw;color:var(--ink)}
+  .rep-banner b{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:1.8cqw;color:var(--ink);background:#fff;border-radius:6px;padding:.25cqw 1.3cqw}
+  .rep-body{display:grid;grid-template-columns:1fr 1.95fr;gap:2.4cqw;padding:1.2cqw 2.4cqw 1.4cqw;min-height:0}
+  .rep-aside h3{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:1.6cqw;color:var(--ink);margin-bottom:.6cqw}
+  .rep-aside p{font-family:'Manrope',sans-serif;font-weight:500;font-size:1.02cqw;line-height:1.38;color:var(--graphite);margin-bottom:.6cqw}
+  .rep-legend{display:flex;align-items:center;gap:.6cqw;font-family:'Manrope',sans-serif;font-size:1cqw;color:var(--muted);font-weight:600;margin-top:.2cqw}
+  .rep-table{display:flex;flex-direction:column;gap:.32cqw}
+  .rep-row{display:grid;grid-template-columns:1.8fr .9fr .9fr .7fr;align-items:center;gap:.8cqw;background:var(--surface);border-radius:8px;padding:.4cqw 1.2cqw}
+  .rep-row.rep-head{background:none;padding:0 1.2cqw .05cqw}
+  .rep-row.rep-head span{font-family:'Manrope',sans-serif;font-size:1cqw;font-weight:600;color:var(--muted)}
+  .rep-c{font-family:'Manrope',sans-serif;font-size:1.12cqw;font-weight:600;color:var(--ink)}
+  .rep-box{justify-self:start;text-align:center;font-family:'Manrope',sans-serif;font-weight:800;font-size:1.15cqw;color:var(--ink);background:#fff;border:1.5px solid var(--div);border-radius:100px;padding:.3cqw 0;width:5.8cqw}
+  .rep-box.amber{border-color:#E8B53D}
+  .rep-box.green{border-color:#39B772}
+  .rep-box.red{border-color:#E5564B}
+  .rep-box.gray{border-color:var(--div);color:var(--graphite)}
+  .rep-box.warn{color:#E5564B;font-size:1.4cqw}
+  .rep-pct{justify-self:start;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:1.38cqw;color:var(--ink)}
+  .rep-recs{margin-top:.8cqw;min-height:0}
+  .rep-recs h4{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:1.4cqw;color:var(--ink);margin-bottom:.55cqw}
+  .rep-recs h4 b{font-weight:800}
+  .rep-recs .grid{display:grid;grid-template-columns:1fr 1fr;gap:.55cqw .8cqw}
+  .rep-rec{background:#E9F3FB;border-radius:8px;padding:.55cqw 1cqw;font-family:'Manrope',sans-serif;font-size:.96cqw;line-height:1.26;color:#2C648F;font-weight:500}
+  .rep-rec b{color:#163E5F;font-weight:800}
+  .about .cards .card{padding:2.4cqw 2.2cqw;gap:1cqw}
+
+  /* navigation */
+  .nav{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:14px;font-family:'Space Mono',monospace;font-size:12px;color:#8b93a3;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);padding:7px 14px;border-radius:100px;user-select:none;white-space:nowrap}
+  .nav b{color:#cfd6e2}
+  .nav .hint{color:#5b6373}
+  /* hide nav on touch devices (phones/tablets, any orientation) — swipe is the affordance there; also keeps it out of the iOS "save to PDF" render */
+  @media (pointer:coarse){.nav{display:none}}
+
+  /* ---------- print / PDF ---------- */
+  @media print{
+    @page{size:1280px 720px;margin:0}
+    html,body{background:#fff;height:auto;display:block;overflow:visible}
+    .stage{display:block;height:auto}
+    .nav{display:none}
+    .slide{display:flex!important;width:1280px;height:720px;aspect-ratio:auto;border-radius:0;box-shadow:none;page-break-after:always;break-after:page;margin:0}
+    *{animation:none!important;opacity:1!important;transform:none!important}
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <!-- 1 · TITLE -->
+  <section class="slide split active">
+    <div class="left">
+      <div class="bd"><span class="dot"></span>Cloverity</div>
+      <div class="big">AI, що<br>працює.</div>
+      <div class="tiny">Сергій · CEO · <a href="https://cloverity.co">cloverity.co</a></div>
+    </div>
+    <div class="right">
+      <p class="quote">Більшість «прикручують ChatGPT» — і не отримують <span class="hl"><span>результату.</span></span></p>
+      <p class="sub">Ми будуємо AI-продукти, що працюють в реальному бізнесі й окупаються.</p>
+      <span class="cta">Дивимось, як <span class="arr">→</span></span>
+    </div>
+  </section>
+
+  <!-- 2 · ABOUT CLOVERITY -->
+  <section class="slide content about">
+    <div class="pad">
+      <div class="kicker"><span>02 / ХТО МИ</span><span class="trule"><span class="line"></span><span class="sq"></span></span></div>
+      <h2 class="h2 sm">Cloverity — <span class="blue">AI-first</span> компанія.<br>Будуємо продукти, не демо.</h2>
+      <p class="lead" style="margin-top:1.4cqw;margin-bottom:0;max-width:50ch">Повний цикл під одним дахом — від ідеї та прототипу до інтеграцій, білінгу й підтримки. <b>AI вже працює в реальному бізнесі наших клієнтів у UK, US та Україні.</b></p>
+      <div class="cards c3 mid">
+        <div class="card"><div class="num">10+ РОКІВ</div><div class="ct-t">Інженерія та лідство</div><div class="ct-d">Роки у великих міжнародних enterprise-проєктах: healthcare, fintech, automotive, agritech та аналітика даних</div></div>
+        <div class="card"><div class="num">ПОВНИЙ ЦИКЛ</div><div class="ct-t">Одна команда</div><div class="ct-d">Бекенд · фронтенд · AI/RAG · інфраструктура · оплати</div></div>
+        <div class="card"><div class="num">РЕАЛЬНІ КЛІЄНТИ</div><div class="ct-t">Не лише демо</div><div class="ct-d">Tender-audit SaaS, видобування з SEC-звітів (100% точність), document copilots</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · PROBLEM -->
+  <section class="slide content">
+    <div class="pad">
+      <div class="kicker"><span>03 / ПРОБЛЕМА РИНКУ</span><span class="trule"><span class="line"></span><span class="sq"></span></span></div>
+      <h2 class="h2">Усі хочуть «додати AI».<br>Майже ніхто не <span class="blue">доводить.</span></h2>
+      <div class="grid2">
+        <div class="cell"><div class="lbl">Шлях <em>01</em> <span class="tag">купити</span></div><div class="ct">Дають команді корпоративний ChatGPT — і чекають дива</div></div>
+        <div class="cell"><div class="lbl">Шлях <em>02</em> <span class="tag">будувати</span></div><div class="ct">Починають самі — і застрягають між прототипом і реальним запуском</div></div>
+      </div>
+      <p class="punch">Демо вражає. У реальному процесі — <mark>не злітає.</mark></p>
+    </div>
+  </section>
+
+  <!-- 4 · WHAT REAL AI MEANS -->
+  <section class="slide content">
+    <div class="pad">
+      <div class="kicker"><span>04 / СПРАВЖНЄ AI-РІШЕННЯ</span><span class="trule"><span class="line"></span><span class="sq"></span></span></div>
+      <h2 class="h2">Чотири речі, яких немає в <span class="blue">«чаті»:</span></h2>
+      <div class="cards c4 mid">
+        <div class="card"><div class="ic">🧠</div><div class="ct-t">Домен</div><div class="ct-d">Правила й знання вашої галузі, не загальні відповіді</div></div>
+        <div class="card"><div class="ic">🔗</div><div class="ct-t">Інтеграція</div><div class="ct-d">Живе у вашому процесі: файли, дані, експорт, оплати</div></div>
+        <div class="card"><div class="ic">🛡️</div><div class="ct-t">Надійність</div><div class="ct-d">Повторюваність + захисні правила + простежуваність</div></div>
+        <div class="card"><div class="ic">📈</div><div class="ct-t">Окупність</div><div class="ct-d">Рахуємо цінність, а не «вау-демо»</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · CHATGPT vs PURPOSE-BUILT -->
+  <section class="slide content">
+    <div class="pad">
+      <div class="kicker"><span>05 / CHATGPT vs PURPOSE-BUILT</span><span class="trule"><span class="line"></span><span class="sq"></span></span></div>
+      <h2 class="h2 sm">ChatGPT — це двигун.<br>Ми будуємо <span class="blue">автомобіль.</span></h2>
+      <div class="cmp">
+        <div class="cmp-row head"><div></div><div class="ch chatgpt">Корпоративний ChatGPT</div><div class="ch ours">Purpose-built · Cloverity</div></div>
+        <div class="cmp-row"><div class="dim">Великі документи</div><div class="c bad">Вікно 32K — 200-стор. RFP не влазить, губить середину</div><div class="c ours">Весь обсяг через RAG + індекс</div></div>
+        <div class="cmp-row"><div class="dim">Доменні правила</div><div class="c bad">Загальні відповіді</div><div class="c ours">Жорсткі захисні правила під галузь</div></div>
+        <div class="cmp-row"><div class="dim">Інтеграція</div><div class="c bad">Окреме вікно, ручне копіювання</div><div class="c ours">Вбудовано у ваш процес</div></div>
+        <div class="cmp-row"><div class="dim">Повторюваність</div><div class="c bad">Різна відповідь щоразу</div><div class="c ours">Однаковий стандарт щоразу</div></div>
+        <div class="cmp-row"><div class="dim">Аудит</div><div class="c bad">«Перевірте самі»</div><div class="c ours">Простежувані знахідки + звіт</div></div>
+        <div class="cmp-row"><div class="dim">Ваші дані</div><div class="c bad">У чужому чаті</div><div class="c ours">У вашій інфраструктурі</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · CASE · PROBLEM -->
+  <section class="slide content">
+    <div class="pad">
+      <div class="kicker"><span>06 / КЕЙС · ПРОБЛЕМА</span><span class="trule"><span class="line"></span><span class="sq"></span></span></div>
+      <h2 class="h2">Tender-audit SaaS, який ми збудували для <span class="blue">UK-клієнта.</span></h2>
+      <p class="lead">Компанії програють тендери <b>не за слабку ідею — за формальну помилку.</b></p>
+      <div class="chips">
+        <span>розбіжність цін між документами</span>
+        <span>відсутній обов'язковий документ</span>
+        <div style="flex-basis:100%;height:0"></div>
+        <span>перевищений ліміт обсягу</span>
+        <span>прострочений підпис</span>
+        <span>текст чужого клієнта</span>
+      </div>
+      <p class="punch">Зловити це треба <mark>до подання.</mark></p>
+    </div>
+  </section>
+
+  <!-- 7 · CASE · WHAT WE BUILT -->
+  <section class="slide content">
+    <div class="pad">
+      <div class="kicker"><span>07 / КЕЙС · РІШЕННЯ</span><span class="trule"><span class="line"></span><span class="sq"></span></span></div>
+      <h2 class="h2 sm">Двофазний <span class="blue">AI-рушій.</span></h2>
+      <div class="cards c2" style="margin-top:1.8cqw">
+        <div class="card"><div class="lbl">ФАЗА <em>I</em></div><div class="ct-t">Аудитор</div><div class="ct-d">Сканує документ на формальні провали — нульова толерантність</div></div>
+        <div class="card"><div class="lbl">ФАЗА <em>II</em></div><div class="ct-t">Консультант</div><div class="ct-d">Не лише оцінює — переписує слабкі місця, дає готові правки</div></div>
+      </div>
+      <div class="stat">
+        <div class="s"><b>21</b><span>доменний критерій + вимоги тендеру</span></div>
+        <div class="s"><b>5</b><span>рівнів критичності (L1→L5) — від дискваліфікації до редакторських помилок</span></div>
+      </div>
+      <div class="strip" style="margin-top:1.4cqw">
+        <span class="meta">Стек:</span>
+        <span class="pill">Python</span><span class="pill">FastAPI</span><span class="pill">Next.js</span><span class="pill">Postgres + pgvector</span><span class="pill">GCP</span>
+        <span class="meta">— платні клієнти</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · CASE · WHY NOT CHATGPT -->
+  <section class="slide content">
+    <div class="pad">
+      <div class="kicker"><span>08 / КЕЙС · ЧОМУ НЕ CHATGPT</span><span class="trule"><span class="line"></span><span class="sq"></span></span></div>
+      <h2 class="h2">Саме тут «загальний чат» <span class="blue">розсипається.</span></h2>
+      <div class="cards c2 mid">
+        <div class="card"><div class="ic">📄</div><div class="ct-d"><b style="color:var(--ink);font-size:1.9cqw;font-family:Bricolage Grotesque">Обсяг</b><br>RFP + пропозиція = 150K+ токенів — не влазить у 32K-вікно підписки Плюс, втрачає середину</div></div>
+        <div class="card"><div class="ic">✅</div><div class="ct-d"><b style="color:var(--ink);font-size:1.9cqw;font-family:Bricolage Grotesque">Жорсткі правила</b><br>«€0.01 розбіжності = дискваліфікація» — чат так стабільно не вміє</div></div>
+        <div class="card"><div class="ic">🔁</div><div class="ct-d"><b style="color:var(--ink);font-size:1.9cqw;font-family:Bricolage Grotesque">Звірка документів</b><br>Форма пропозиції ↔ Цінова відомість — це не діалог, а структурна звірка</div></div>
+        <div class="card"><div class="ic">🧾</div><div class="ct-d"><b style="color:var(--ink);font-size:1.9cqw;font-family:Bricolage Grotesque">Простежуваний звіт</b><br>Статуси й рівні, яким можна довіряти, а не абзац прози</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 · CASE · RESULT before/after -->
+  <section class="slide content">
+    <div class="pad">
+      <div class="kicker"><span>09 / КЕЙС · РЕЗУЛЬТАТ</span><span class="trule"><span class="line"></span><span class="sq"></span></span></div>
+      <h2 class="h2 sm">«Слабко» — чи <span class="blue">готовий текст на заміну?</span></h2>
+      <div class="ba">
+        <div class="b bad">
+          <div class="tagline">❌ Звичайний інструмент</div>
+          <div class="quote">«Виконавче резюме слабке.»</div>
+        </div>
+        <div class="b good">
+          <div class="tagline">✅ Наше рішення</div>
+          <div class="quote">Провалює тест <b>«Орієнтація на клієнта»</b>: учасник згаданий 15×, замовник — 3×; немає 4-частинної структури.</div>
+          <div class="rw">+ готовий абзац на заміну з метриками: <mark>«…бюджет €10 млн, зниження витрат на 15% за 12 місяців»</mark></div>
+        </div>
+      </div>
+      <p class="punch">Помилки видно <mark>до дедлайну</mark> — з пріоритетом і готовою правкою.</p>
+    </div>
+  </section>
+
+  <!-- 10 · REPORT EXAMPLE (BidReview) -->
+  <section class="slide content report">
+    <div class="pad">
+      <div class="kicker"><span>10 / ПРИКЛАД ЗВІТУ · BIDREVIEW</span><span class="trule"><span class="line"></span><span class="sq"></span></span></div>
+      <div class="rep-doc">
+        <div class="rep-top">
+          <div class="rep-logo">bidre<span>v</span>iew</div>
+          <dl class="rep-meta">
+            <dt>Applicant:</dt><dd>Name of organisation</dd>
+            <dt>Bid:</dt><dd>Name of tender goes here</dd>
+            <dt>Buyer:</dt><dd>Buyer name here</dd>
+            <dt>Review Date:</dt><dd>16 September, 2025</dd>
+          </dl>
+          <div class="rep-plan">
+            <span class="fl"><b>Free</b> to Scorecard</span>
+            <span class="pb">View Plans</span>
+          </div>
+        </div>
+        <div class="rep-banner"><span class="bt">Overall BidScore™</span><b>86%</b></div>
+        <div class="rep-body">
+          <div class="rep-aside">
+            <h3>Overall Analysis</h3>
+            <p>The submission presents a confident, well-structured response across all evaluation criteria — strong operational capability, clear evidence of high fill rates, a pre-screened candidate pool, and reporting systems that support real-time oversight and contract compliance.</p>
+            <p>Proof points, while present, could be more outcome-focused and the win themes sharper. With minor refinements to positioning and specificity, this could be a high-scoring bid.</p>
+            <div class="rep-legend">⚠ Missing or inadequate content</div>
+          </div>
+          <div class="rep-main">
+            <div class="rep-table">
+              <div class="rep-row rep-head"><span>Criterion</span><span>Est Score</span><span>Max Score</span><span>% Achieved</span></div>
+              <div class="rep-row"><span class="rep-c">Criterion 1 — as per RFP</span><span class="rep-box amber">1,640</span><span class="rep-box gray">2,000</span><span class="rep-pct">82%</span></div>
+              <div class="rep-row"><span class="rep-c">Criterion 2 — as per RFP</span><span class="rep-box green">3,400</span><span class="rep-box gray">3,500</span><span class="rep-pct">97%</span></div>
+              <div class="rep-row"><span class="rep-c">Criterion 3 — as per RFP</span><span class="rep-box red">210</span><span class="rep-box gray">500</span><span class="rep-pct">42%</span></div>
+              <div class="rep-row"><span class="rep-c">Criterion 4 — as per RFP</span><span class="rep-box amber">1,640</span><span class="rep-box gray">2,000</span><span class="rep-pct">82%</span></div>
+              <div class="rep-row"><span class="rep-c">Criterion 5 — as per RFP</span><span class="rep-box red warn">⚠</span><span class="rep-box gray">1,000</span><span class="rep-pct">0%</span></div>
+            </div>
+            <div class="rep-recs">
+              <h4><b>Key Recommendations</b> for improvement</h4>
+              <div class="grid">
+                <div class="rep-rec"><b>Strengthen outcome-focused proof points.</b> Tie figures and features to buyer impact.</div>
+                <div class="rep-rec"><b>Sharpen win themes &amp; competitive edge.</b> Make explicit what sets the bidder apart.</div>
+                <div class="rep-rec"><b>Condense &amp; prioritise key content.</b> Shorten dense passages; lead with headlines.</div>
+                <div class="rep-rec"><b>Connect features to benefits.</b> Link systems and policies to the buyer's challenges.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 · HOW WE BUILD -->
+  <section class="slide content">
+    <div class="pad">
+      <div class="kicker"><span>11 / ЯК CLOVERITY БУДУЄ</span><span class="trule"><span class="line"></span><span class="sq"></span></span></div>
+      <h2 class="h2 sm">Discovery → Прототип → <span class="blue">Запуск.</span></h2>
+      <div class="steps">
+        <div class="st"><div class="n">01</div><div class="t">Discovery</div><div class="d">Де AI дає ROI — а де ні, скажемо чесно</div></div>
+        <div class="arrow">→</div>
+        <div class="st"><div class="n">02</div><div class="t">Прототип</div><div class="d">Робоча перевірка на ваших даних — за тижні</div></div>
+        <div class="arrow">→</div>
+        <div class="st"><div class="n">03</div><div class="t">Запуск</div><div class="d">Інтеграції, захисні правила, моніторинг, оплати, передача</div></div>
+      </div>
+      <p class="punch" style="font-size:2.2cqw">Одна команда: бекенд · фронтенд · AI · пошук по даних · інфраструктура</p>
+    </div>
+  </section>
+
+  <!-- 12 · WHAT WE CAN BUILD FOR YOU -->
+  <section class="slide content">
+    <div class="pad">
+      <div class="kicker"><span>12 / ЩО МИ БУДУЄМО</span><span class="trule"><span class="line"></span><span class="sq"></span></span></div>
+      <h2 class="h2">Що ми можемо <span class="blue">збудувати вам.</span></h2>
+      <div class="cards c4 mid">
+        <div class="card"><div class="ic">📑</div><div class="ct-t">Помічники для документів</div><div class="ct-d">Аудит / видобування / перевірка по великих документах</div></div>
+        <div class="card"><div class="ic">🔎</div><div class="ct-t">Внутрішній Google для компанії</div><div class="ct-d">Пошук документів і відповідей по вашій базі знань, із джерелами</div></div>
+        <div class="card"><div class="ic">⚙️</div><div class="ct-t">Workflow-автоматизація</div><div class="ct-d">Рутинні рішення, класифікація, звіти у вашому процесі</div></div>
+        <div class="card"><div class="ic">🧩</div><div class="ct-t">Custom</div><div class="ct-d">Специфічний біль? Обговоримо на ознайомчому дзвінку</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 · WHY CLOVERITY -->
+  <section class="slide content">
+    <div class="pad">
+      <div class="kicker"><span>13 / ЧОМУ МИ</span><span class="trule"><span class="line"></span><span class="sq"></span></span></div>
+      <h2 class="h2">Чому <span class="blue">Cloverity.</span></h2>
+      <div class="checks">
+        <div class="ck"><div class="mk">✓</div><div class="tx">Реальні платні клієнти<small>Не просто демо — AI-продукт уже працює в реальній роботі</small></div></div>
+        <div class="ck"><div class="mk">✓</div><div class="tx">Повний цикл<small>Від ідеї до білінгу й підтримки — без жонглювання підрядниками</small></div></div>
+        <div class="ck"><div class="mk">✓</div><div class="tx">Чесний ROI<small>Кажемо «ні», коли AI вам не потрібен</small></div></div>
+        <div class="ck"><div class="mk">✓</div><div class="tx">AI-first команда<small>Не «вебстудія, що додала AI»</small></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 · Q&A -->
+  <section class="slide qa">
+    <div class="qa-in">
+      <div class="bd"><span class="dot"></span>Cloverity</div>
+      <div class="qa-big">Питання?</div>
+    </div>
+  </section>
+
+  <!-- 15 · CTA / CLOSING -->
+  <section class="slide split">
+    <div class="left">
+      <div class="bd"><span class="dot"></span>Cloverity</div>
+      <div class="big">Наступний<br>крок.</div>
+      <div class="tiny">Сергій · CEO · <a href="https://cloverity.co">cloverity.co</a></div>
+    </div>
+    <div class="right">
+      <p class="quote">Безкоштовний <span class="hl"><span>ознайомчий дзвінок</span></span> — 45 хв.</p>
+      <p class="sub">Скажемо, чи є тут кейс для AI і яким він міг би бути. Решта часу — ваші питання.</p>
+      <span class="cta">Забронювати дзвінок <span class="arr">→</span></span>
+    </div>
+  </section>
+
+</div>
+
+<div class="nav"><b id="cur">01</b> / <span id="tot">14</span><span class="hint">·&nbsp; ← → / свайп&nbsp; гортати &nbsp;·&nbsp; ⌘P → PDF</span></div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;
+  document.getElementById('tot').textContent=String(slides.length).padStart(2,'0');
+  function render(){
+    slides.forEach(s=>s.classList.remove('active'));
+    slides[i].classList.add('active');
+    document.getElementById('cur').textContent=String(i+1).padStart(2,'0');
+  }
+  function show(n){ i=(n+slides.length)%slides.length; render(); }
+  document.addEventListener('keydown',e=>{
+    if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();show(i+1);}
+    else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();show(i-1);}
+    else if(e.key==='Home'){show(0);}
+    else if(e.key==='End'){show(slides.length-1);}
+  });
+  // touch / swipe navigation for mobile
+  let tx=0, ty=0;
+  document.addEventListener('touchstart',e=>{const t=e.changedTouches[0];tx=t.clientX;ty=t.clientY;},{passive:true});
+  document.addEventListener('touchend',e=>{
+    const t=e.changedTouches[0], dx=t.clientX-tx, dy=t.clientY-ty;
+    if(Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)) show(i+(dx<0?1:-1)); // swipe left=next, right=prev
+  },{passive:true});
+  // slide switching: keyboard (arrows / space / PageUp-Down) on desktop, swipe on touch; tap-to-navigate disabled by request
+</script>
+</body>
+</html>
